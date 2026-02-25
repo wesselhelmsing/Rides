@@ -10,272 +10,166 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Rittenregistratie</title>
 
-  <!-- PWA Manifest inline via blob -->
   <script>
     const manifest = {
-      name: "Rittenregistratie",
-      short_name: "Ritten",
-      description: "Registreer zakelijke en privéritten",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#0a0a0f",
-      theme_color: "#0a0a0f",
-      orientation: "portrait",
-      icons: [
-        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>", sizes: "192x192", type: "image/svg+xml" },
-        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>", sizes: "512x512", type: "image/svg+xml" }
+      name:"Rittenregistratie",short_name:"Ritten",description:"Registreer zakelijke en privéritten",
+      start_url:".",display:"standalone",background_color:"#0a0a0f",theme_color:"#0a0a0f",orientation:"portrait",
+      icons:[
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>",sizes:"192x192",type:"image/svg+xml"},
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>",sizes:"512x512",type:"image/svg+xml"}
       ]
     };
-    const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-    const manifestURL = URL.createObjectURL(blob);
-    const link = document.createElement("link");
-    link.rel = "manifest"; link.href = manifestURL;
-    document.head.appendChild(link);
+    const mblob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+    const ml=document.createElement("link");ml.rel="manifest";ml.href=URL.createObjectURL(mblob);
+    document.head.appendChild(ml);
   </script>
-
-  <!-- Apple touch icon inline -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>" />
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; }
-    body {
-      min-height: 100dvh;
-      background: #0a0a0f;
-      color: #e5e7eb;
-      font-family: 'DM Sans', sans-serif;
-      max-width: 430px;
-      margin: 0 auto;
-      overflow-x: hidden;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{height:100%}
+    body{min-height:100dvh;background:#0a0a0f;color:#e5e7eb;font-family:'DM Sans',sans-serif;max-width:430px;margin:0 auto;overflow-x:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
 
-    @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:.4} }
-    @keyframes slideUp{ from{transform:translateY(28px);opacity:0} to{transform:translateY(0);opacity:1} }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    @keyframes spin   { to{transform:rotate(360deg)} }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .slide-up{animation:slideUp .38s cubic-bezier(.16,1,.3,1) both}
+    .fade-in{animation:fadeIn .25s ease both}
+    .pulse-anim{animation:pulse 1.5s ease-in-out infinite}
 
-    .slide-up { animation: slideUp .38s cubic-bezier(.16,1,.3,1) both; }
-    .fade-in  { animation: fadeIn .25s ease both; }
-    .pulse-anim { animation: pulse 1.5s ease-in-out infinite; }
+    #app{display:flex;flex-direction:column;min-height:100dvh}
+    header{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;background:rgba(10,10,15,.94);backdrop-filter:blur(12px);padding-top:max(14px,env(safe-area-inset-top));border-bottom:1px solid rgba(255,255,255,.05);gap:6px}
+    .logo{display:flex;align-items:center;gap:7px;flex-shrink:0}
+    .logo span{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#f97316;letter-spacing:.06em}
+    .nav-tabs{display:flex;gap:2px}
+    .nav-tab{padding:6px 10px;border-radius:8px;background:transparent;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;transition:all .2s;position:relative;white-space:nowrap}
+    .nav-tab.active{background:rgba(249,115,22,.15);color:#f97316}
+    .nav-tab:not(.active){color:#6b7280}
+    .nav-dot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:#f97316}
 
-    /* Layout */
-    #app { display: flex; flex-direction: column; min-height: 100dvh; }
-    header {
-      padding: 18px 22px 0;
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 20;
-      background: rgba(10,10,15,.92); backdrop-filter: blur(12px);
-      padding-top: max(18px, env(safe-area-inset-top));
-      border-bottom: 1px solid rgba(255,255,255,.05);
-    }
-    .logo { display:flex; align-items:center; gap:8px; }
-    .logo span { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; color:#f97316; letter-spacing:.06em; }
-    .nav-tabs { display:flex; gap:4px; }
-    .nav-tab {
-      padding: 6px 14px; border-radius: 8px; background: transparent;
-      border: none; cursor: pointer; font-size: 13px; font-weight: 500;
-      font-family: 'DM Sans', sans-serif; transition: all .2s; position: relative;
-    }
-    .nav-tab.active { background: rgba(249,115,22,.15); color: #f97316; }
-    .nav-tab:not(.active) { color: #6b7280; }
-    .nav-dot { position:absolute; top:4px; right:4px; width:6px; height:6px; border-radius:50%; background:#f97316; }
+    .view{flex:1;padding:18px 18px 90px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    #view-active{align-items:center;padding-bottom:110px}
 
-    /* Views */
-    .view { flex:1; padding:24px 22px 32px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; }
-    #view-active { align-items:center; }
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px}
+    .card-orange{background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(249,115,22,.04));border:1px solid rgba(249,115,22,.25)}
 
-    /* Cards */
-    .card {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px; padding: 16px 20px;
-    }
-    .card-orange {
-      background: linear-gradient(135deg, rgba(249,115,22,.12), rgba(249,115,22,.04));
-      border: 1px solid rgba(249,115,22,.25);
-    }
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat-label{font-size:10px;color:#6b7280;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+    .stat-val{font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:#f1f5f9}
 
-    /* Stats grid */
-    .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .stat-label { font-size:11px; color:#6b7280; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
-    .stat-val { font-size:26px; font-weight:600; font-family:'DM Mono',monospace; color:#f1f5f9; }
+    .btn-primary{width:100%;padding:15px 0;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:16px;font-weight:600;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(249,115,22,.4);transition:transform .15s}
+    .btn-primary:active{transform:scale(.98)}
+    .btn-secondary{width:100%;padding:13px 0;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e5e7eb;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .btn-danger{width:100%;padding:15px 0;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-size:16px;font-weight:600;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(220,38,38,.35);transition:transform .15s}
+    .btn-danger:active{transform:scale(.98)}
+    .btn-ghost{flex:1;padding:12px 0;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#9ca3af;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .btn-confirm{flex:2;padding:12px 0;border-radius:12px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 
-    /* Buttons */
-    .btn-primary {
-      width:100%; padding:18px 0; border-radius:14px; border:none; cursor:pointer;
-      background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
-      font-size:17px; font-weight:600; letter-spacing:.02em; font-family:'DM Sans',sans-serif;
-      box-shadow:0 8px 32px rgba(249,115,22,.45), 0 0 0 1px rgba(249,115,22,.3);
-      transition:transform .15s, box-shadow .15s;
-    }
-    .btn-primary:active { transform:scale(.98); box-shadow:0 4px 16px rgba(249,115,22,.35); }
-    .btn-danger {
-      width:100%; padding:18px 0; border-radius:14px; border:none; cursor:pointer;
-      background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff;
-      font-size:17px; font-weight:600; font-family:'DM Sans',sans-serif;
-      box-shadow:0 8px 32px rgba(220,38,38,.4); transition:transform .15s;
-    }
-    .btn-danger:active { transform:scale(.98); }
-    .btn-ghost {
-      flex:1; padding:14px 0; border-radius:12px;
-      border:1px solid rgba(255,255,255,.1); background:transparent;
-      color:#9ca3af; font-size:15px; cursor:pointer; font-family:'DM Sans',sans-serif;
-    }
-    .btn-confirm {
-      flex:2; padding:14px 0; border-radius:12px; border:none;
-      background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
-      font-size:15px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;
-      box-shadow:0 4px 16px rgba(249,115,22,.4);
-    }
+    .f-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .2s}
+    .f-input:focus{border-color:rgba(249,115,22,.6)}
+    .f-input::placeholder{color:#4b5563}
+    .f-label{font-size:10px;color:#6b7280;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+    .f-group{display:flex;flex-direction:column;gap:3px}
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .f-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%236b7280' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+    .f-select option{background:#1a1a2e;color:#e5e7eb}
+    .km-big{font-size:22px;font-family:'DM Mono',monospace}
 
-    /* Input */
-    .km-input {
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
-      border-radius:12px; padding:14px 18px; color:#fff; font-size:26px;
-      font-family:'DM Mono',monospace; width:100%; outline:none; transition:border-color .2s;
-    }
-    .km-input:focus { border-color: rgba(249,115,22,.6); }
+    .live-badge{display:flex;align-items:center;gap:10px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:999px;padding:8px 20px}
+    .live-dot{width:10px;height:10px;border-radius:50%;background:#f97316;box-shadow:0 0 0 4px rgba(249,115,22,.25),0 0 12px #f97316}
+    .live-label{font-family:'DM Mono',monospace;font-size:13px;color:#f97316;letter-spacing:.1em}
+    .big-km{font-size:70px;font-weight:700;font-family:'DM Mono',monospace;color:#f1f5f9;line-height:1;letter-spacing:-.02em}
+    .km-unit{color:#6b7280;font-family:'DM Mono',monospace;font-size:14px;margin-top:4px}
+    .timer-badge{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 28px;font-family:'DM Mono',monospace;font-size:20px;color:#e5e7eb}
 
-    /* Live tracking */
-    .live-badge {
-      display:flex; align-items:center; gap:10px;
-      background:rgba(249,115,22,.1); border:1px solid rgba(249,115,22,.3);
-      border-radius:999px; padding:8px 20px; margin-top:8px;
-    }
-    .live-dot {
-      width:10px; height:10px; border-radius:50%; background:#f97316;
-      box-shadow:0 0 0 4px rgba(249,115,22,.25), 0 0 12px #f97316;
-    }
-    .live-label { font-family:'DM Mono',monospace; font-size:13px; color:#f97316; letter-spacing:.1em; }
-    .big-km { font-size:76px; font-weight:700; font-family:'DM Mono',monospace; color:#f1f5f9; line-height:1; letter-spacing:-.02em; }
-    .km-unit { color:#6b7280; font-family:'DM Mono',monospace; font-size:16px; margin-top:4px; }
-    .timer-badge {
-      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
-      border-radius:14px; padding:12px 28px;
-      font-family:'DM Mono',monospace; font-size:20px; color:#e5e7eb;
-    }
+    .info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .info-label{font-size:10px;color:#6b7280;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;flex-shrink:0;padding-top:1px}
+    .info-val{font-size:13px;color:#e5e7eb;text-align:right}
+    .divider{height:1px;background:rgba(255,255,255,.07);margin:2px 0}
 
-    /* Row info */
-    .info-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-    .info-label { font-size:11px; color:#6b7280; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.07em; white-space:nowrap; flex-shrink:0; }
-    .info-val { font-size:13px; color:#e5e7eb; text-align:right; }
-    .divider { height:1px; background:rgba(255,255,255,.07); margin:4px 0; }
+    .rit-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:border-color .2s;margin-bottom:10px}
+    .rit-card.open{border-color:rgba(249,115,22,.3)}
+    .rit-card.handmatig{border-left:3px solid rgba(99,102,241,.5)}
+    .rit-header{width:100%;background:none;border:none;cursor:pointer;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;color:#e5e7eb;text-align:left}
+    .rit-km{font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:#f1f5f9}
+    .rit-date{font-size:11px;color:#6b7280;margin-top:2px}
+    .rit-meta{display:flex;align-items:center;gap:5px}
+    .type-badge{padding:3px 9px;border-radius:999px;font-size:10px;font-family:'DM Mono',monospace;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+    .type-badge.zakelijk{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+    .type-badge.prive{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+    .type-badge.handmatig-badge{background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3)}
+    .chevron{transition:transform .2s;color:#6b7280}
+    .chevron.open{transform:rotate(180deg)}
+    .rit-details{padding:0 16px 16px;display:flex;flex-direction:column;gap:7px}
+    .type-toggle{display:flex;gap:5px}
+    .pill{padding:5px 13px;border-radius:999px;font-size:12px;font-family:'DM Mono',monospace;font-weight:500;border:none;cursor:pointer;transition:all .2s}
+    .pill.active-z{background:#3b82f6;color:#fff;box-shadow:0 0 10px rgba(59,130,246,.4)}
+    .pill.active-p{background:#a855f7;color:#fff;box-shadow:0 0 10px rgba(168,85,247,.4)}
+    .pill:not(.active-z):not(.active-p){background:rgba(255,255,255,.07);color:#9ca3af}
+    .btn-delete{padding:8px 0;border-radius:8px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:#f87171;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%}
 
-    /* History */
-    .rit-card {
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:16px; overflow:hidden; transition:border-color .2s;
-    }
-    .rit-card.open { border-color:rgba(249,115,22,.3); }
-    .rit-header {
-      width:100%; background:none; border:none; cursor:pointer;
-      padding:16px 18px; display:flex; justify-content:space-between; align-items:center;
-      color:#e5e7eb; text-align:left;
-    }
-    .rit-km { font-family:'DM Mono',monospace; font-size:22px; font-weight:600; color:#f1f5f9; }
-    .rit-date { font-size:12px; color:#6b7280; margin-top:2px; }
-    .rit-meta { display:flex; align-items:center; gap:8px; }
-    .type-badge {
-      padding:4px 12px; border-radius:999px; font-size:11px;
-      font-family:'DM Mono',monospace; font-weight:500; text-transform:uppercase; letter-spacing:.07em;
-    }
-    .type-badge.zakelijk { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
-    .type-badge.prive     { background:rgba(168,85,247,.15); color:#c084fc; border:1px solid rgba(168,85,247,.3); }
-    .chevron { transition:transform .2s; color:#6b7280; }
-    .chevron.open { transform:rotate(180deg); }
-    .rit-details { padding:0 18px 18px; display:flex; flex-direction:column; gap:10px; }
-    .type-toggle { display:flex; gap:6px; }
-    .pill {
-      padding:6px 18px; border-radius:999px; font-size:13px;
-      font-family:'DM Mono',monospace; font-weight:500; border:none; cursor:pointer; transition:all .2s;
-    }
-    .pill.active-z { background:#3b82f6; color:#fff; box-shadow:0 0 12px rgba(59,130,246,.4); }
-    .pill.active-p { background:#a855f7; color:#fff; box-shadow:0 0 12px rgba(168,85,247,.4); }
-    .pill:not(.active-z):not(.active-p) { background:rgba(255,255,255,.07); color:#9ca3af; }
-    .btn-delete {
-      margin-top:4px; padding:8px 0; border-radius:8px;
-      border:1px solid rgba(239,68,68,.25); background:rgba(239,68,68,.06);
-      color:#f87171; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%;
-    }
+    .export-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+    .section-title{font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;font-family:'DM Mono',monospace}
 
-    /* Floating bar */
-    #float-bar {
-      position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-      width:100%; max-width:430px;
-      padding:12px 20px; background:rgba(10,10,15,.95); backdrop-filter:blur(14px);
-      border-top:1px solid rgba(249,115,22,.3);
-      display:none; justify-content:space-between; align-items:center;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-      z-index:30;
-    }
-    #float-bar.visible { display:flex; }
-    .float-btn {
-      padding:6px 14px; background:rgba(249,115,22,.2);
-      border:1px solid rgba(249,115,22,.4); border-radius:8px;
-      color:#f97316; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif;
-    }
+    .addr-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .addr-name{font-weight:600;font-size:14px;color:#f1f5f9}
+    .addr-str{font-size:12px;color:#6b7280;margin-top:2px}
 
-    /* Error */
-    .error-box {
-      background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3);
-      border-radius:12px; padding:12px 16px; color:#f87171; font-size:13px;
-    }
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:100;display:flex;flex-direction:column;justify-content:flex-end}
+    .modal-overlay.hidden{display:none}
+    .modal{background:#111118;border-radius:20px 20px 0 0;border-top:1px solid rgba(255,255,255,.1);padding:22px 18px;max-height:90dvh;overflow-y:auto;display:flex;flex-direction:column;gap:13px;padding-bottom:max(22px,env(safe-area-inset-bottom))}
+    .modal-title{font-size:17px;font-weight:600;color:#f1f5f9}
+    .modal-handle{width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 2px}
 
-    /* Empty state */
-    .empty { text-align:center; padding:48px 0; color:#4b5563; }
-    .empty-icon { font-size:44px; margin-bottom:12px; }
-    .empty-title { font-size:16px; color:#6b7280; margin-bottom:6px; }
-    .empty-sub { font-size:13px; }
+    .addr-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;font-size:12px;font-family:'DM Mono',monospace;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.28);color:#f97316;cursor:pointer;white-space:nowrap}
 
-    /* Install banner */
-    #install-banner {
-      display:none; position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-      width:100%; max-width:430px; padding:14px 20px;
-      background:rgba(15,15,20,.97); border-top:1px solid rgba(249,115,22,.35);
-      backdrop-filter:blur(16px); z-index:40; flex-direction:column; gap:8px;
-      padding-bottom: max(14px, env(safe-area-inset-bottom));
-    }
-    #install-banner.show { display:flex; }
-    .install-row { display:flex; justify-content:space-between; align-items:center; }
-    .install-title { font-size:14px; font-weight:600; color:#f1f5f9; }
-    .install-sub { font-size:12px; color:#6b7280; }
-    .install-btns { display:flex; gap:8px; }
-    .btn-install { padding:8px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
-    .btn-dismiss { padding:8px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#9ca3af; font-size:13px; cursor:pointer; }
+    #float-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:11px 18px;background:rgba(10,10,15,.96);backdrop-filter:blur(14px);border-top:1px solid rgba(249,115,22,.3);display:none;justify-content:space-between;align-items:center;padding-bottom:max(11px,env(safe-area-inset-bottom));z-index:30}
+    #float-bar.visible{display:flex}
+    .float-btn{padding:6px 14px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.4);border-radius:8px;color:#f97316;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+    .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 13px;color:#f87171;font-size:13px}
+    .success-box{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:10px 13px;color:#4ade80;font-size:13px}
+    .empty{text-align:center;padding:40px 0;color:#4b5563}
+    .empty-icon{font-size:38px;margin-bottom:10px}
+    .empty-title{font-size:14px;color:#6b7280;margin-bottom:4px}
+    .gps-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;margin-top:5px}
+
+    #install-banner{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:13px 18px;background:rgba(15,15,20,.97);border-top:1px solid rgba(249,115,22,.35);backdrop-filter:blur(16px);z-index:40;flex-direction:column;gap:8px;padding-bottom:max(13px,env(safe-area-inset-bottom))}
+    #install-banner.show{display:flex}
+    .install-btns{display:flex;gap:8px;margin-top:4px}
+    .btn-install{padding:9px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .btn-dismiss{padding:9px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#9ca3af;font-size:13px;cursor:pointer}
   </style>
 </head>
 <body>
-
 <div id="app">
+
+  <!-- HEADER -->
   <header>
     <div class="logo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#f97316"/>
         <circle cx="12" cy="9" r="2.5" fill="#0a0a0f"/>
       </svg>
       <span>RITTEN</span>
     </div>
     <div class="nav-tabs">
-      <button class="nav-tab active" id="tab-dash" onclick="switchView('dashboard')">Dashboard</button>
-      <button class="nav-tab" id="tab-hist" onclick="switchView('history')">
-        Historie
-        <span class="nav-dot" id="hist-dot" style="display:none"></span>
+      <button class="nav-tab active" id="tab-dash"   onclick="switchView('dashboard')">Dashboard</button>
+      <button class="nav-tab"        id="tab-hist"   onclick="switchView('history')">
+        Historie<span class="nav-dot" id="hist-dot" style="display:none"></span>
       </button>
+      <button class="nav-tab"        id="tab-inst"   onclick="switchView('instellingen')">⚙️</button>
     </div>
   </header>
 
-  <!-- DASHBOARD -->
+  <!-- ── DASHBOARD ── -->
   <div id="view-dashboard" class="view slide-up">
     <div class="stats-grid">
       <div class="card"><div class="stat-label">Totaal ritten</div><div class="stat-val" id="st-total">0</div></div>
@@ -284,24 +178,23 @@
       <div class="card"><div class="stat-label">Privé</div><div class="stat-val" id="st-prive">0</div></div>
     </div>
 
-    <!-- idle -->
-    <div id="phase-idle">
-      <div class="card card-orange" style="text-align:center;padding:28px 24px;">
-        <div style="color:#9ca3af;font-size:14px;margin-bottom:16px;">Klaar om te rijden?</div>
+    <div id="phase-idle" style="display:flex;flex-direction:column;gap:10px">
+      <div class="card card-orange" style="text-align:center;padding:22px 18px">
+        <div style="color:#9ca3af;font-size:13px;margin-bottom:14px">Klaar om te rijden?</div>
         <button class="btn-primary" onclick="beginKmInput()">🚗&nbsp; Start een nieuwe rit</button>
       </div>
-      <div id="idle-error" class="error-box fade-in" style="display:none;margin-top:12px;"></div>
+      <button class="btn-secondary" onclick="openManualModal()">✏️&nbsp; Rit handmatig toevoegen</button>
+      <div id="idle-error" class="error-box" style="display:none"></div>
     </div>
 
-    <!-- km input -->
     <div id="phase-km" style="display:none" class="slide-up">
-      <div class="card" style="display:flex;flex-direction:column;gap:16px;">
-        <div style="font-size:16px;font-weight:500;">Huidige KM-stand</div>
-        <div style="color:#9ca3af;font-size:13px;">Voer de kilometerstand van je dashboard in.</div>
-        <input id="km-input" class="km-input" type="number" inputmode="decimal" placeholder="bv. 45230"
+      <div class="card" style="display:flex;flex-direction:column;gap:13px">
+        <div style="font-size:15px;font-weight:600">Huidige KM-stand</div>
+        <div style="color:#9ca3af;font-size:13px">Voer de kilometerstand van je dashboard in.</div>
+        <input id="km-input" class="f-input km-big" type="number" inputmode="decimal" placeholder="bv. 45230"
           onkeydown="if(event.key==='Enter') startTracking()" />
-        <div id="km-error" class="error-box" style="display:none;"></div>
-        <div style="display:flex;gap:10px;">
+        <div id="km-error" class="error-box" style="display:none"></div>
+        <div style="display:flex;gap:10px">
           <button class="btn-ghost" onclick="cancelKmInput()">Annuleer</button>
           <button class="btn-confirm" onclick="startTracking()">Track starten →</button>
         </div>
@@ -309,322 +202,690 @@
     </div>
   </div>
 
-  <!-- ACTIVE TRACKING -->
-  <div id="view-active" class="view fade-in" style="display:none;">
-    <div class="live-badge pulse-anim" style="margin-top:8px;">
+  <!-- ── ACTIEVE RIT ── -->
+  <div id="view-active" class="view fade-in" style="display:none">
+    <div class="live-badge pulse-anim" style="margin-top:8px">
       <span class="live-dot"></span>
       <span class="live-label">ACTIEF TRACKEN</span>
     </div>
-    <div style="text-align:center;margin-top:12px;">
+    <div style="text-align:center;margin-top:10px">
       <div class="big-km" id="live-km">0.0</div>
       <div class="km-unit">kilometer</div>
     </div>
     <div class="timer-badge" id="live-timer">00m 00s</div>
-    <div class="card" style="width:100%;display:flex;flex-direction:column;gap:10px;">
+    <div class="card" style="width:100%;display:flex;flex-direction:column;gap:8px">
       <div class="info-row"><span class="info-label">Start KM</span><span class="info-val" id="a-start-km">—</span></div>
       <div class="divider"></div>
       <div class="info-row"><span class="info-label">Starttijd</span><span class="info-val" id="a-start-time">—</span></div>
       <div class="divider"></div>
       <div class="info-row"><span class="info-label">Startlocatie</span><span class="info-val" id="a-start-loc">Ophalen…</span></div>
     </div>
-    <button class="btn-danger" onclick="stopTracking()" style="margin-top:4px;">⏹&nbsp; Beëindig rit</button>
-    <div style="font-size:12px;color:#4b5563;text-align:center;padding-bottom:16px;">Houd het scherm actief voor nauwkeurige tracking</div>
+    <button class="btn-danger" onclick="stopTracking()">⏹&nbsp; Beëindig rit</button>
+    <div style="font-size:12px;color:#4b5563;text-align:center">Houd het scherm actief voor nauwkeurige tracking</div>
   </div>
 
-  <!-- HISTORY -->
-  <div id="view-history" class="view slide-up" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h2 style="font-size:20px;font-weight:600;">Alle ritten</h2>
-      <span id="rit-count" style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7280;"></span>
+  <!-- ── HISTORIE ── -->
+  <div id="view-history" class="view slide-up" style="display:none">
+
+    <!-- PDF Export -->
+    <div class="export-box">
+      <div class="section-title">📄 Exporteer naar PDF</div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Van</div><input id="pdf-van" class="f-input" type="date" /></div>
+        <div class="f-group"><div class="f-label">Tot</div><input id="pdf-tot" class="f-input" type="date" /></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select id="pdf-type" class="f-select" style="flex:1">
+          <option value="alle">Alle ritten</option>
+          <option value="zakelijk">Alleen Zakelijk</option>
+          <option value="privé">Alleen Privé</option>
+        </select>
+        <button onclick="exportPDF()" style="padding:11px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap;box-shadow:0 4px 14px rgba(249,115,22,.35)">
+          ↓ PDF
+        </button>
+      </div>
+      <div id="pdf-msg" style="display:none"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="section-title">Alle ritten</div>
+      <span id="rit-count" style="font-family:'DM Mono',monospace;font-size:11px;color:#6b7280"></span>
     </div>
     <div id="history-list"></div>
-    <div id="history-empty" class="empty" style="display:none;">
+    <div id="history-empty" class="empty" style="display:none">
       <div class="empty-icon">🗺️</div>
       <div class="empty-title">Nog geen ritten geregistreerd</div>
-      <div class="empty-sub">Start een rit via het dashboard.</div>
+      <div style="font-size:13px">Start een rit of voeg er handmatig een toe.</div>
     </div>
   </div>
+
+  <!-- ── INSTELLINGEN ── -->
+  <div id="view-instellingen" class="view slide-up" style="display:none">
+    <div class="section-title">📍 Opgeslagen adressen</div>
+    <div style="color:#6b7280;font-size:13px;line-height:1.5">Sla vaste locaties op (Thuis, Werk, etc.). Bij vertrek of aankomst op dit adres markeert de app de locatienaam automatisch — ook bij handmatig invoeren.</div>
+    <div id="addr-list"></div>
+    <button class="btn-secondary" onclick="openAddrModal()">+ Adres toevoegen</button>
+
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:4px 0"></div>
+    <div class="section-title">⚠️ Data</div>
+    <button onclick="clearAllData()" style="padding:12px;border-radius:12px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:#f87171;font-size:13px;cursor:pointer;width:100%;font-family:'DM Sans',sans-serif">
+      Verwijder alle ritdata
+    </button>
+  </div>
+
 </div>
 
-<!-- Float bar when tracking + not on active view -->
+<!-- FLOAT BAR -->
 <div id="float-bar">
-  <div style="display:flex;align-items:center;gap:8px;">
-    <span style="width:10px;height:10px;border-radius:50%;background:#f97316;box-shadow:0 0 0 4px rgba(249,115,22,.25);display:inline-block;" class="pulse-anim"></span>
-    <span style="font-size:13px;color:#f97316;font-family:'DM Mono',monospace;">Rit actief · <span id="float-km">0.0</span> km</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="width:10px;height:10px;border-radius:50%;background:#f97316;box-shadow:0 0 0 4px rgba(249,115,22,.25);display:inline-block" class="pulse-anim"></span>
+    <span style="font-size:13px;color:#f97316;font-family:'DM Mono',monospace">Actief · <span id="float-km">0.0</span> km</span>
   </div>
   <button class="float-btn" onclick="switchView('active')">Bekijk</button>
 </div>
 
-<!-- Install banner (Android) -->
+<!-- INSTALL BANNER -->
 <div id="install-banner">
-  <div class="install-row">
-    <div>
-      <div class="install-title">📍 Voeg toe aan beginscherm</div>
-      <div class="install-sub">Gebruik als app, altijd bij de hand</div>
-    </div>
-  </div>
+  <div style="font-size:14px;font-weight:600;color:#f1f5f9">📍 Voeg toe aan beginscherm</div>
+  <div style="font-size:12px;color:#6b7280">Gebruik als app, altijd bij de hand</div>
   <div class="install-btns">
     <button class="btn-install" id="btn-install-do">Installeer</button>
     <button class="btn-dismiss" onclick="dismissInstall()">Later</button>
   </div>
 </div>
 
+<!-- MODAL: Handmatig toevoegen -->
+<div id="modal-manual" class="modal-overlay hidden" onclick="handleOverlayClick(event,'modal-manual')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Rit handmatig toevoegen</div>
+
+    <div class="f-row">
+      <div class="f-group"><div class="f-label">Datum</div><input id="m-datum" class="f-input" type="date" /></div>
+      <div class="f-group"><div class="f-label">Starttijd</div><input id="m-start-tijd" class="f-input" type="time" /></div>
+    </div>
+
+    <div class="f-group">
+      <div class="f-label">Startlocatie</div>
+      <div id="tags-start" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+      <input id="m-start-addr" class="f-input" type="text" placeholder="Adres of plaatsnaam" />
+    </div>
+
+    <div class="f-group">
+      <div class="f-label">Eindlocatie</div>
+      <div id="tags-end" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+      <input id="m-end-addr" class="f-input" type="text" placeholder="Adres of plaatsnaam" />
+    </div>
+
+    <div class="f-row">
+      <div class="f-group">
+        <div class="f-label">Begin KM-stand</div>
+        <input id="m-km-start" class="f-input" type="number" inputmode="decimal" placeholder="45230" oninput="calcManualEind()" />
+      </div>
+      <div class="f-group">
+        <div class="f-label">Gereden KM</div>
+        <input id="m-km-reden" class="f-input" type="number" inputmode="decimal" placeholder="42.5" oninput="calcManualEind()" />
+      </div>
+    </div>
+
+    <div class="f-row">
+      <div class="f-group">
+        <div class="f-label">Eindtijd (optioneel)</div>
+        <input id="m-end-tijd" class="f-input" type="time" />
+      </div>
+      <div class="f-group">
+        <div class="f-label">Rittype</div>
+        <select id="m-type" class="f-select">
+          <option value="zakelijk">Zakelijk</option>
+          <option value="privé">Privé</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="m-eind-preview" style="display:none;font-size:12px;color:#6b7280;text-align:right;margin-top:-4px"></div>
+    <div id="m-error" class="error-box" style="display:none"></div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" onclick="closeModal('modal-manual')">Annuleer</button>
+      <button class="btn-confirm" onclick="saveManualRit()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Adres toevoegen -->
+<div id="modal-addr" class="modal-overlay hidden" onclick="handleOverlayClick(event,'modal-addr')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="addr-modal-title">📍 Adres toevoegen</div>
+
+    <div class="f-group">
+      <div class="f-label">Label (bv. "Thuis" of "Werk")</div>
+      <input id="a-naam" class="f-input" type="text" placeholder="Thuis" />
+    </div>
+    <div class="f-group">
+      <div class="f-label">Adres</div>
+      <input id="a-adres" class="f-input" type="text" placeholder="Molenstraat 12, Amsterdam" />
+    </div>
+
+    <button class="btn-secondary" id="btn-use-loc" onclick="useCurrentLocation()">
+      📡 Gebruik huidige GPS-locatie
+    </button>
+    <div id="a-loc-status" style="font-size:12px;color:#6b7280"></div>
+    <div id="a-error" class="error-box" style="display:none"></div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" onclick="closeModal('modal-addr')">Annuleer</button>
+      <button class="btn-confirm" onclick="saveAddr()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
-const LS_KEY = "ritten_v2";
-let ritten = [];
-let phase = "idle";        // idle | kmInput | tracking
-let currentView = "dashboard";
-let watchId = null;
-let timerInterval = null;
-let startTime = null;
-let elapsed = 0;
-let totalKm = 0;
-let prevPos = null;
-let startKmVal = 0;
-let startAddr = "—";
-let expandedId = null;
-let deferredPrompt = null;
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+const LS_RITTEN   = "ritten_v2";
+const LS_ADRESSEN = "ritten_adressen_v1";
+let ritten = [], adressen = [];
 
-// ─── PERSIST ─────────────────────────────────────────────────────────────────
-function loadData() {
-  try { ritten = JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { ritten = []; }
+function loadData(){
+  try{ ritten   = JSON.parse(localStorage.getItem(LS_RITTEN))   || []; }catch{ ritten=[]; }
+  try{ adressen = JSON.parse(localStorage.getItem(LS_ADRESSEN)) || []; }catch{ adressen=[]; }
 }
-function saveData() {
-  localStorage.setItem(LS_KEY, JSON.stringify(ritten));
+const saveRitten   = () => localStorage.setItem(LS_RITTEN,   JSON.stringify(ritten));
+const saveAdressen = () => localStorage.setItem(LS_ADRESSEN, JSON.stringify(adressen));
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let phase="idle", currentView="dashboard";
+let watchId=null, timerInterval=null;
+let startTime=null, elapsed=0, totalKm=0;
+let prevPos=null, startKmVal=0, startAddr="—";
+let expandedId=null, deferredPrompt=null;
+let editingAddrId=null, addrLat=null, addrLon=null;
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function haversine(a,b){
+  const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180;
+  const s=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+function nearestAddr(lat,lon,radiusM=200){
+  let best=null,bestD=Infinity;
+  for(const a of adressen){
+    if(a.lat==null) continue;
+    const d=haversine({lat,lon},{lat:a.lat,lon:a.lon})*1000;
+    if(d<radiusM&&d<bestD){best=a;bestD=d;}
+  }
+  return best;
+}
+function fmtKm(km)  {return parseFloat(km).toFixed(1);}
+function fmtDur(s)  {const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return `${h?h+"u ":""}${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;}
+function fmtDate(ts){return new Date(ts).toLocaleDateString("nl-NL",{day:"2-digit",month:"short",year:"numeric"});}
+function fmtTime(ts){return new Date(ts).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"});}
+function fmtISO(d)  {return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function el(id)     {return document.getElementById(id);}
+function showErr(id,msg){const e=el(id);e.textContent=msg;e.style.display="block";}
+function hide(id)   {el(id).style.display="none";}
+
+async function getAddr(lat,lon){
+  const nearby=nearestAddr(lat,lon);
+  if(nearby) return `${nearby.naam} (${nearby.adres})`;
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    const d=await r.json(); const a=d.address;
+    return [a.road,a.house_number].filter(Boolean).join(" ")||a.city||a.town||`${lat.toFixed(4)},${lon.toFixed(4)}`;
+  }catch{return `${lat.toFixed(4)},${lon.toFixed(4)}`;}
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function haversine(a, b) {
-  const R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLon = (b.lon - a.lon) * Math.PI / 180;
-  const s = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
-}
-function fmtKm(km)  { return parseFloat(km).toFixed(1); }
-function fmtDur(s)  { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return `${h?h+"u ":""}${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`; }
-function fmtDate(ts){ return new Date(ts).toLocaleDateString("nl-NL",{day:"2-digit",month:"short",year:"numeric"}); }
-function fmtTime(ts){ return new Date(ts).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"}); }
-
-async function getAddr(lat, lon) {
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-    const d = await r.json();
-    const a = d.address;
-    return [a.road, a.house_number].filter(Boolean).join(" ") || a.city || a.town || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-  } catch { return `${lat.toFixed(4)}, ${lon.toFixed(4)}`; }
-}
-
-// ─── VIEWS ───────────────────────────────────────────────────────────────────
-function switchView(v) {
-  currentView = v;
-  ["dashboard","active","history"].forEach(n => {
-    const el = document.getElementById("view-"+n);
-    if (n === v) { el.style.display="flex"; el.classList.add("slide-up"); setTimeout(()=>el.classList.remove("slide-up"),500); }
-    else el.style.display="none";
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function switchView(v){
+  currentView=v;
+  ["dashboard","active","history","instellingen"].forEach(n=>{
+    const e=el("view-"+n);
+    if(n===v){e.style.display="flex";e.classList.add("slide-up");setTimeout(()=>e.classList.remove("slide-up"),500);}
+    else e.style.display="none";
   });
-  document.getElementById("tab-dash").className = "nav-tab" + (v==="dashboard"?" active":"");
-  document.getElementById("tab-hist").className = "nav-tab" + (v==="history"?" active":"");
-
-  // float bar: show when tracking and not on active view
-  const fb = document.getElementById("float-bar");
-  fb.className = (phase==="tracking" && v!=="active") ? "visible" : "";
-
-  if (v==="history") renderHistory();
-  if (v==="dashboard") updateStats();
+  el("tab-dash").className="nav-tab"+(v==="dashboard"?" active":"");
+  el("tab-hist").className="nav-tab"+(v==="history"?" active":"");
+  el("tab-inst").className="nav-tab"+(v==="instellingen"?" active":"");
+  el("float-bar").className=(phase==="tracking"&&v!=="active")?"visible":"";
+  if(v==="history"){setDefaultDates();renderHistory();}
+  if(v==="dashboard") updateStats();
+  if(v==="instellingen") renderAddresses();
 }
 
-// ─── STATS ───────────────────────────────────────────────────────────────────
-function updateStats() {
-  document.getElementById("st-total").textContent = ritten.length;
-  document.getElementById("st-zakelijk").textContent = ritten.filter(r=>r.type==="zakelijk").length;
-  document.getElementById("st-prive").textContent = ritten.filter(r=>r.type==="privé").length;
-  document.getElementById("st-km").textContent = fmtKm(ritten.reduce((s,r)=>s+r.kmReden,0))+" km";
-  const dot = document.getElementById("hist-dot");
-  dot.style.display = ritten.length > 0 ? "block" : "none";
+function updateStats(){
+  el("st-total").textContent   =ritten.length;
+  el("st-zakelijk").textContent=ritten.filter(r=>r.type==="zakelijk").length;
+  el("st-prive").textContent   =ritten.filter(r=>r.type==="privé").length;
+  el("st-km").textContent      =fmtKm(ritten.reduce((s,r)=>s+r.kmReden,0))+" km";
+  el("hist-dot").style.display =ritten.length>0?"block":"none";
 }
 
-// ─── PHASES ──────────────────────────────────────────────────────────────────
-function beginKmInput() {
-  phase = "kmInput";
-  document.getElementById("phase-idle").style.display = "none";
-  document.getElementById("phase-km").style.display   = "block";
-  document.getElementById("km-input").value = "";
-  document.getElementById("km-error").style.display = "none";
-  setTimeout(()=>document.getElementById("km-input").focus(), 100);
+// ═══════════════════════════════════════════════════
+// GPS TRACKING
+// ═══════════════════════════════════════════════════
+function beginKmInput(){
+  phase="kmInput";
+  el("phase-idle").style.display="none";
+  el("phase-km").style.display="block";
+  el("km-input").value=""; hide("km-error");
+  setTimeout(()=>el("km-input").focus(),100);
 }
-function cancelKmInput() {
-  phase = "idle";
-  document.getElementById("phase-km").style.display  = "none";
-  document.getElementById("phase-idle").style.display = "block";
+function cancelKmInput(){
+  phase="idle";
+  el("phase-km").style.display="none";
+  el("phase-idle").style.display="flex";
 }
-function showErr(id, msg) { const e=document.getElementById(id); e.textContent=msg; e.style.display="block"; }
 
-function startTracking() {
-  const raw = document.getElementById("km-input").value.replace(",",".");
-  const val = parseFloat(raw);
-  if (isNaN(val)||val<0) { showErr("km-error","Voer een geldige KM-stand in."); return; }
-  if (!navigator.geolocation) { showErr("km-error","Geolocation wordt niet ondersteund."); return; }
-  document.getElementById("km-error").style.display = "none";
-  startKmVal = val;
-  totalKm = 0; prevPos = null; elapsed = 0;
-  navigator.geolocation.getCurrentPosition(async pos => {
-    const sp = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-    prevPos = sp; startTime = Date.now();
-    startAddr = "Ophalen…";
-    phase = "tracking";
-    // update active view
-    document.getElementById("a-start-km").textContent   = val.toLocaleString("nl-NL")+" km";
-    document.getElementById("a-start-time").textContent = fmtTime(startTime);
-    document.getElementById("a-start-loc").textContent  = "Ophalen…";
-    document.getElementById("live-km").textContent      = "0.0";
-    document.getElementById("live-timer").textContent   = "00m 00s";
+function startTracking(){
+  const val=parseFloat(el("km-input").value.replace(",","."));
+  if(isNaN(val)||val<0){showErr("km-error","Voer een geldige KM-stand in.");return;}
+  if(!navigator.geolocation){showErr("km-error","Geolocation niet ondersteund.");return;}
+  hide("km-error");
+  startKmVal=val; totalKm=0; prevPos=null; elapsed=0;
+
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const sp={lat:pos.coords.latitude,lon:pos.coords.longitude};
+    prevPos=sp; startTime=Date.now(); startAddr="Ophalen…"; phase="tracking";
+    el("a-start-km").textContent  =val.toLocaleString("nl-NL")+" km";
+    el("a-start-time").textContent=fmtTime(startTime);
+    el("a-start-loc").textContent ="Ophalen…";
+    el("live-km").textContent="0.0"; el("live-timer").textContent="00m 00s";
     switchView("active");
-    // addr async
-    getAddr(sp.lat, sp.lon).then(a => {
-      startAddr = a;
-      document.getElementById("a-start-loc").textContent = a;
-    });
-    // timer
+
+    getAddr(sp.lat,sp.lon).then(a=>{startAddr=a;el("a-start-loc").textContent=a;});
+
     clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      elapsed++;
-      document.getElementById("live-timer").textContent = fmtDur(elapsed);
-    }, 1000);
-    // watch
-    watchId = navigator.geolocation.watchPosition(p => {
-      const cur = { lat: p.coords.latitude, lon: p.coords.longitude };
-      if (prevPos) { totalKm += haversine(prevPos, cur); }
-      prevPos = cur;
-      document.getElementById("live-km").textContent = fmtKm(totalKm);
-      document.getElementById("float-km").textContent = fmtKm(totalKm);
-    }, null, { enableHighAccuracy:true, maximumAge:0 });
-  }, () => showErr("km-error","Kon locatie niet ophalen — geef toestemming."), { enableHighAccuracy:true });
+    timerInterval=setInterval(()=>{
+      elapsed=Math.floor((Date.now()-startTime)/1000);
+      el("live-timer").textContent=fmtDur(elapsed);
+      el("float-km").textContent=fmtKm(totalKm);
+    },1000);
+
+    watchId=navigator.geolocation.watchPosition(p=>{
+      const cur={lat:p.coords.latitude,lon:p.coords.longitude};
+      if(prevPos) totalKm+=haversine(prevPos,cur);
+      prevPos=cur;
+      el("live-km").textContent=fmtKm(totalKm);
+      el("float-km").textContent=fmtKm(totalKm);
+    },null,{enableHighAccuracy:true,maximumAge:0});
+
+  },()=>showErr("km-error","Locatie niet beschikbaar — geef toestemming."),{enableHighAccuracy:true});
 }
 
-async function stopTracking() {
+async function stopTracking(){
   clearInterval(timerInterval);
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  const endKm = startKmVal + totalKm;
-  const endLat = prevPos?.lat, endLon = prevPos?.lon;
-  const endAddr = (endLat) ? await getAddr(endLat, endLon) : "—";
-  const rit = {
-    id: Date.now(), startTime, endTime: Date.now(), duration: elapsed,
-    kmStart: parseFloat(startKmVal.toFixed(2)),
-    kmReden: parseFloat(totalKm.toFixed(2)),
-    kmEind: parseFloat(endKm.toFixed(2)),
-    startAddr, endAddr, type: "zakelijk"
+  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  const endLat=prevPos?.lat,endLon=prevPos?.lon;
+  const endAddr=endLat?await getAddr(endLat,endLon):"—";
+  const dur=Math.floor((Date.now()-startTime)/1000);
+  const rit={
+    id:Date.now(),startTime,endTime:Date.now(),duration:dur,
+    kmStart:parseFloat(startKmVal.toFixed(2)),
+    kmReden:parseFloat(totalKm.toFixed(2)),
+    kmEind:parseFloat((startKmVal+totalKm).toFixed(2)),
+    startAddr,endAddr,type:"zakelijk",handmatig:false
   };
-  ritten.unshift(rit);
-  saveData();
-  phase = "idle";
-  // reset dashboard phase
-  document.getElementById("phase-km").style.display   = "none";
-  document.getElementById("phase-idle").style.display = "block";
-  document.getElementById("idle-error").style.display = "none";
-  document.getElementById("float-bar").className = "";
+  ritten.unshift(rit); saveRitten();
+  phase="idle";
+  el("phase-km").style.display="none"; el("phase-idle").style.display="flex"; hide("idle-error");
+  el("float-bar").className="";
   switchView("history");
 }
 
-// ─── HISTORY ─────────────────────────────────────────────────────────────────
-function renderHistory() {
-  const list = document.getElementById("history-list");
-  const empty = document.getElementById("history-empty");
-  const count = document.getElementById("rit-count");
-  if (ritten.length === 0) { list.innerHTML=""; empty.style.display="block"; count.textContent=""; return; }
-  empty.style.display = "none";
-  count.textContent = ritten.length+" rit"+(ritten.length!==1?"ten":"");
-  list.innerHTML = ritten.map((r,i) => {
-    const open = expandedId === r.id;
+// ═══════════════════════════════════════════════════
+// MANUAL RIT
+// ═══════════════════════════════════════════════════
+function openManualModal(){
+  const now=new Date();
+  el("m-datum").value=fmtISO(now);
+  el("m-start-tijd").value=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  el("m-end-tijd").value=""; el("m-start-addr").value=""; el("m-end-addr").value="";
+  el("m-km-start").value=""; el("m-km-reden").value=""; el("m-type").value="zakelijk";
+  hide("m-error"); hide("m-eind-preview");
+  // Render saved address tags
+  const tags=adressen.map(a=>`<span class="addr-tag" onclick="fillAddr('start','${escQ(a.naam)} (${escQ(a.adres)})')">📍 ${a.naam}</span>`).join("");
+  el("tags-start").innerHTML=tags;
+  el("tags-end").innerHTML=adressen.map(a=>`<span class="addr-tag" onclick="fillAddr('end','${escQ(a.naam)} (${escQ(a.adres)})')">📍 ${a.naam}</span>`).join("");
+  el("modal-manual").classList.remove("hidden");
+}
+function escQ(s){return s.replace(/'/g,"\\'");}
+function fillAddr(side,val){el("m-"+side+"-addr").value=val;}
+
+function calcManualEind(){
+  const ks=parseFloat(el("m-km-start").value)||0;
+  const kr=parseFloat(el("m-km-reden").value)||0;
+  if(kr>0){
+    el("m-eind-preview").style.display="block";
+    el("m-eind-preview").textContent="Eind KM-stand: "+(ks+kr).toFixed(1)+" km";
+  } else hide("m-eind-preview");
+}
+
+function saveManualRit(){
+  const datum=el("m-datum").value, stTijd=el("m-start-tijd").value;
+  const etTijd=el("m-end-tijd").value;
+  const startA=el("m-start-addr").value.trim(), endA=el("m-end-addr").value.trim();
+  const kmStart=parseFloat(el("m-km-start").value);
+  const kmReden=parseFloat(el("m-km-reden").value.replace(",","."));
+  const type=el("m-type").value;
+
+  if(!datum||!stTijd){showErr("m-error","Datum en starttijd zijn verplicht.");return;}
+  if(!startA||!endA) {showErr("m-error","Vul start- en eindlocatie in.");return;}
+  if(isNaN(kmReden)||kmReden<=0){showErr("m-error","Voer een geldig aantal gereden km in.");return;}
+
+  const stMs=new Date(`${datum}T${stTijd}`).getTime();
+  let etMs=stMs+3600000;
+  if(etTijd){const et=new Date(`${datum}T${etTijd}`).getTime();if(et>stMs)etMs=et;}
+  const dur=Math.floor((etMs-stMs)/1000);
+  const kmE=isNaN(kmStart)?kmReden:(kmStart+kmReden);
+
+  const rit={
+    id:Date.now(),startTime:stMs,endTime:etMs,duration:dur,
+    kmStart:isNaN(kmStart)?0:parseFloat(kmStart.toFixed(2)),
+    kmReden:parseFloat(kmReden.toFixed(2)),
+    kmEind:parseFloat(kmE.toFixed(2)),
+    startAddr:startA,endAddr:endA,type,handmatig:true
+  };
+  ritten.unshift(rit);
+  ritten.sort((a,b)=>b.startTime-a.startTime);
+  saveRitten();
+  closeModal("modal-manual");
+  switchView("history"); updateStats();
+}
+
+// ═══════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════
+function setDefaultDates(){
+  const now=new Date();
+  if(!el("pdf-van").value) el("pdf-van").value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-01`;
+  if(!el("pdf-tot").value) el("pdf-tot").value=fmtISO(now);
+}
+
+function renderHistory(){
+  const list=el("history-list"),empty=el("history-empty"),count=el("rit-count");
+  if(!ritten.length){list.innerHTML="";empty.style.display="block";count.textContent="";return;}
+  empty.style.display="none";
+  count.textContent=ritten.length+" rit"+(ritten.length!==1?"ten":"");
+  list.innerHTML=ritten.map((r,i)=>{
+    const open=expandedId===r.id;
     return `
-    <div class="rit-card${open?" open":""}" id="rc-${r.id}" style="margin-bottom:10px;${i<4?"animation:fadeIn .3s ease "+i*0.06+"s both":""}">
+    <div class="rit-card${r.handmatig?" handmatig":""}${open?" open":""}" id="rc-${r.id}" style="${i<6?"animation:fadeIn .3s ease "+i*0.05+"s both":""}">
       <button class="rit-header" onclick="toggleRit(${r.id})">
         <div>
           <div class="rit-km">${fmtKm(r.kmReden)} km</div>
           <div class="rit-date">${fmtDate(r.startTime)} · ${fmtTime(r.startTime)}</div>
         </div>
         <div class="rit-meta">
+          ${r.handmatig?'<span class="type-badge handmatig-badge">✏️</span>':""}
           <span class="type-badge ${r.type==="zakelijk"?"zakelijk":"prive"}">${r.type==="zakelijk"?"Zakelijk":"Privé"}</span>
           <svg class="chevron${open?" open":""}" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
       </button>
-      ${open ? `
+      ${open?`
       <div class="rit-details fade-in">
         <div class="divider"></div>
-        ${[["Start KM",r.kmStart.toLocaleString("nl-NL")+" km"],["Eind KM",r.kmEind.toLocaleString("nl-NL")+" km"],["Gereden",fmtKm(r.kmReden)+" km"],["Duur",fmtDur(r.duration)],["Startlocatie",r.startAddr],["Eindlocatie",r.endAddr]].map(([l,v])=>`
-          <div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>
-        `).join('<div class="divider"></div>')}
-        <div class="divider"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:#6b7280;">Rittype</span>
+        ${[["Start KM",r.kmStart>0?r.kmStart.toLocaleString("nl-NL")+" km":"—"],
+           ["Eind KM" ,r.kmEind >0?r.kmEind .toLocaleString("nl-NL")+" km":"—"],
+           ["Gereden" ,fmtKm(r.kmReden)+" km"],
+           ["Duur"    ,fmtDur(r.duration)],
+           ["Startlocatie",r.startAddr],
+           ["Eindlocatie" ,r.endAddr]
+          ].map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div><div class="divider"></div>`).join("")}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+          <span style="font-size:12px;color:#6b7280">Rittype</span>
           <div class="type-toggle">
             <button class="pill ${r.type==="zakelijk"?"active-z":""}" onclick="setType(${r.id},'zakelijk')">Zakelijk</button>
-            <button class="pill ${r.type==="privé"?"active-p":""}" onclick="setType(${r.id},'privé')">Privé</button>
+            <button class="pill ${r.type==="privé"?"active-p":""}"   onclick="setType(${r.id},'privé')">Privé</button>
           </div>
         </div>
         <button class="btn-delete" onclick="deleteRit(${r.id})">Verwijder rit</button>
-      </div>` : ""}
+      </div>`:""}
     </div>`;
   }).join("");
 }
 
-function toggleRit(id) {
-  expandedId = expandedId === id ? null : id;
-  renderHistory();
-}
-function setType(id, type) {
-  ritten = ritten.map(r => r.id===id ? {...r, type} : r);
-  saveData(); renderHistory(); updateStats();
-}
-function deleteRit(id) {
-  if (!confirm("Rit verwijderen?")) return;
-  ritten = ritten.filter(r => r.id !== id);
-  if (expandedId === id) expandedId = null;
-  saveData(); renderHistory(); updateStats();
+function toggleRit(id){expandedId=expandedId===id?null:id;renderHistory();}
+function setType(id,type){ritten=ritten.map(r=>r.id===id?{...r,type}:r);saveRitten();renderHistory();updateStats();}
+function deleteRit(id){
+  if(!confirm("Rit verwijderen?")) return;
+  ritten=ritten.filter(r=>r.id!==id);
+  if(expandedId===id) expandedId=null;
+  saveRitten(); renderHistory(); updateStats();
 }
 
-// ─── PWA INSTALL ─────────────────────────────────────────────────────────────
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault(); deferredPrompt = e;
-  // show banner after 3s if not already installed
-  if (!window.matchMedia("(display-mode: standalone)").matches) {
-    setTimeout(() => document.getElementById("install-banner").classList.add("show"), 3000);
+// ═══════════════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════════════
+function exportPDF(){
+  const vanStr=el("pdf-van").value, totStr=el("pdf-tot").value;
+  const msgEl=el("pdf-msg"); msgEl.className=""; msgEl.style.display="none";
+  if(!vanStr||!totStr){msgEl.className="error-box";msgEl.textContent="Selecteer een periode.";msgEl.style.display="block";return;}
+
+  const van=new Date(vanStr+"T00:00:00").getTime();
+  const tot=new Date(totStr+"T23:59:59").getTime();
+  const typeFilter=el("pdf-type").value;
+  let gefilterd=ritten.filter(r=>r.startTime>=van&&r.startTime<=tot);
+  if(typeFilter!=="alle") gefilterd=gefilterd.filter(r=>r.type===typeFilter);
+  gefilterd.sort((a,b)=>a.startTime-b.startTime);
+
+  if(!gefilterd.length){msgEl.className="error-box";msgEl.textContent="Geen ritten in deze periode.";msgEl.style.display="block";return;}
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+
+  // Header balk
+  doc.setFillColor(249,115,22);
+  doc.rect(0,0,210,30,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18);doc.setFont("helvetica","bold");
+  doc.text("Rittenregistratie",14,13);
+  doc.setFontSize(9);doc.setFont("helvetica","normal");
+  doc.text(`Periode: ${fmtDate(van)} t/m ${fmtDate(tot)}`,14,22);
+  doc.text(`Gegenereerd op: ${fmtDate(Date.now())}`,196,22,{align:"right"});
+
+  // Samenvatting blokken
+  const totKm=gefilterd.reduce((s,r)=>s+r.kmReden,0);
+  const zakKm=gefilterd.filter(r=>r.type==="zakelijk").reduce((s,r)=>s+r.kmReden,0);
+  const prvKm=gefilterd.filter(r=>r.type==="privé")   .reduce((s,r)=>s+r.kmReden,0);
+  const boxes=[
+    {label:"Totaal ritten",val:String(gefilterd.length)},
+    {label:"Totaal km",    val:fmtKm(totKm)+" km"},
+    {label:"Zakelijk",     val:fmtKm(zakKm)+" km"},
+    {label:"Privé",        val:fmtKm(prvKm)+" km"},
+  ];
+  const bw=43,bh=17,by=35,gap=3.5,bx=14;
+  boxes.forEach((b,i)=>{
+    const x=bx+i*(bw+gap);
+    doc.setFillColor(245,245,248);doc.roundedRect(x,by,bw,bh,3,3,"F");
+    doc.setFontSize(7.5);doc.setFont("helvetica","normal");doc.setTextColor(110,110,130);
+    doc.text(b.label,x+bw/2,by+5.5,{align:"center"});
+    doc.setFontSize(13);doc.setFont("helvetica","bold");doc.setTextColor(20,20,35);
+    doc.text(b.val,x+bw/2,by+12.5,{align:"center"});
+  });
+
+  // Ritten tabel
+  doc.autoTable({
+    head:[["#","Datum","Starttijd","Duur","Van","Naar","Begin KM","Gereden","Type"]],
+    body:gefilterd.map((r,i)=>[
+      String(i+1),
+      fmtDate(r.startTime),
+      fmtTime(r.startTime),
+      fmtDur(r.duration),
+      r.startAddr.length>22?r.startAddr.slice(0,20)+"…":r.startAddr,
+      r.endAddr.length>22?r.endAddr.slice(0,20)+"…":r.endAddr,
+      r.kmStart>0?r.kmStart.toLocaleString("nl-NL"):"—",
+      fmtKm(r.kmReden)+" km",
+      r.type==="zakelijk"?"Zakelijk":"Privé"
+    ]),
+    startY:58,theme:"grid",
+    headStyles:{fillColor:[249,115,22],textColor:255,fontSize:8,fontStyle:"bold",cellPadding:3},
+    bodyStyles:{fontSize:7.5,cellPadding:2.5,textColor:[25,25,40]},
+    alternateRowStyles:{fillColor:[249,250,253]},
+    columnStyles:{
+      0:{cellWidth:7,halign:"center"},
+      1:{cellWidth:22},2:{cellWidth:16},3:{cellWidth:20},
+      4:{cellWidth:33},5:{cellWidth:33},
+      6:{cellWidth:16,halign:"right"},7:{cellWidth:18,halign:"right"},
+      8:{cellWidth:15,halign:"center"}
+    },
+    didParseCell(d){
+      if(d.section==="body"&&d.column.index===8){
+        d.cell.styles.textColor=d.cell.raw==="Zakelijk"?[37,99,235]:[147,51,234];
+        d.cell.styles.fontStyle="bold";
+      }
+      if(d.section==="body"&&d.column.index===0&&d.row.raw&&gefilterd[parseInt(d.cell.raw)-1]?.handmatig){
+        d.cell.styles.textColor=[99,102,241];
+      }
+    },
+    margin:{left:14,right:14}
+  });
+
+  // Footer
+  const fy=doc.lastAutoTable.finalY+7;
+  doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(249,115,22);
+  doc.text(`Totaal: ${fmtKm(totKm)} km  ·  Zakelijk: ${fmtKm(zakKm)} km  ·  Privé: ${fmtKm(prvKm)} km`,14,fy);
+
+  const pages=doc.internal.getNumberOfPages();
+  for(let p=1;p<=pages;p++){
+    doc.setPage(p);doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(160,160,180);
+    doc.text(`Pagina ${p} van ${pages}`,196,289,{align:"right"});
+  }
+
+  const fname=`Ritten_${vanStr.replace(/-/g,"")}_${totStr.replace(/-/g,"")}${typeFilter!=="alle"?"_"+typeFilter:""}.pdf`;
+  doc.save(fname);
+  msgEl.className="success-box";msgEl.textContent="✅ PDF opgeslagen: "+fname;msgEl.style.display="block";
+}
+
+// ═══════════════════════════════════════════════════
+// ADRESSEN
+// ═══════════════════════════════════════════════════
+function openAddrModal(editId=null){
+  editingAddrId=editId; addrLat=null; addrLon=null;
+  el("a-naam").value=""; el("a-adres").value="";
+  el("a-loc-status").textContent=""; hide("a-error");
+  el("btn-use-loc").disabled=false;
+  if(editId){
+    const a=adressen.find(x=>x.id===editId);
+    if(a){
+      el("a-naam").value=a.naam; el("a-adres").value=a.adres;
+      addrLat=a.lat; addrLon=a.lon;
+      if(a.lat) el("a-loc-status").textContent=`✅ GPS opgeslagen: ${a.lat.toFixed(4)}, ${a.lon.toFixed(4)}`;
+    }
+    el("addr-modal-title").textContent="📍 Adres bewerken";
+  } else {
+    el("addr-modal-title").textContent="📍 Adres toevoegen";
+  }
+  el("modal-addr").classList.remove("hidden");
+}
+
+function useCurrentLocation(){
+  if(!navigator.geolocation){el("a-loc-status").textContent="Niet beschikbaar.";return;}
+  el("a-loc-status").textContent="📡 Locatie ophalen…";
+  el("btn-use-loc").disabled=true;
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    addrLat=pos.coords.latitude; addrLon=pos.coords.longitude;
+    el("a-loc-status").textContent=`✅ Vastgelegd: ${addrLat.toFixed(4)}, ${addrLon.toFixed(4)}`;
+    if(!el("a-adres").value){
+      try{
+        const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${addrLat}&lon=${addrLon}&format=json`);
+        const d=await r.json();const a=d.address;
+        el("a-adres").value=[a.road,a.house_number,a.city||a.town].filter(Boolean).join(", ");
+      }catch{}
+    }
+    el("btn-use-loc").disabled=false;
+  },()=>{el("a-loc-status").textContent="❌ Locatie niet beschikbaar.";el("btn-use-loc").disabled=false;},{enableHighAccuracy:true});
+}
+
+function saveAddr(){
+  const naam=el("a-naam").value.trim(), adres=el("a-adres").value.trim();
+  if(!naam){showErr("a-error","Geef een naam op.");return;}
+  if(!adres){showErr("a-error","Vul een adres in.");return;}
+  if(editingAddrId){
+    adressen=adressen.map(a=>a.id===editingAddrId?{...a,naam,adres,lat:addrLat,lon:addrLon}:a);
+  } else {
+    adressen.push({id:Date.now(),naam,adres,lat:addrLat,lon:addrLon});
+  }
+  saveAdressen(); closeModal("modal-addr"); renderAddresses();
+}
+
+function deleteAddr(id){
+  if(!confirm("Adres verwijderen?")) return;
+  adressen=adressen.filter(a=>a.id!==id);
+  saveAdressen(); renderAddresses();
+}
+
+function renderAddresses(){
+  const list=el("addr-list");
+  if(!adressen.length){
+    list.innerHTML=`<div class="empty" style="padding:24px 0"><div class="empty-icon">📍</div><div class="empty-title">Nog geen adressen</div></div>`;
+    return;
+  }
+  list.innerHTML=adressen.map(a=>`
+    <div class="addr-card">
+      <div>
+        <div class="addr-name">${a.naam}</div>
+        <div class="addr-str">${a.adres}</div>
+        ${a.lat?`<span class="gps-tag">📡 GPS opgeslagen</span>`:'<span style="font-size:10px;color:#6b7280;display:inline-block;margin-top:4px">Geen GPS — herkenning op naam</span>'}
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="openAddrModal(${a.id})" style="padding:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-size:14px">✏️</button>
+        <button onclick="deleteAddr(${a.id})"    style="padding:7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;cursor:pointer;font-size:14px">🗑️</button>
+      </div>
+    </div>`).join("");
+}
+
+// ═══════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════
+function closeModal(id){el(id).classList.add("hidden");}
+function handleOverlayClick(e,id){if(e.target.id===id)closeModal(id);}
+
+// ═══════════════════════════════════════════════════
+// MISC
+// ═══════════════════════════════════════════════════
+function clearAllData(){
+  if(!confirm("Alle ritdata permanent verwijderen?")) return;
+  ritten=[]; saveRitten(); renderHistory(); updateStats();
+}
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&phase==="tracking"&&startTime){
+    elapsed=Math.floor((Date.now()-startTime)/1000);
+    el("live-timer").textContent=fmtDur(elapsed);
+    el("live-km").textContent=fmtKm(totalKm);
+    el("float-km").textContent=fmtKm(totalKm);
   }
 });
-document.getElementById("btn-install-do").addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  dismissInstall();
+
+// PWA INSTALL
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();deferredPrompt=e;
+  if(!window.matchMedia("(display-mode: standalone)").matches)
+    setTimeout(()=>el("install-banner").classList.add("show"),3000);
 });
-function dismissInstall() {
-  document.getElementById("install-banner").classList.remove("show");
+el("btn-install-do").addEventListener("click",async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice;
+  deferredPrompt=null; dismissInstall();
+});
+function dismissInstall(){el("install-banner").classList.remove("show");}
+
+// SERVICE WORKER
+if("serviceWorker" in navigator){
+  const sw=`const C="ritten-v4";self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.href])).then(()=>self.skipWaiting()))});self.addEventListener("activate",e=>{e.waitUntil(clients.claim())});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"})),{scope:"./"}).catch(()=>{});
 }
 
-// ─── SERVICE WORKER (inline blob) ────────────────────────────────────────────
-if ("serviceWorker" in navigator) {
-  const swCode = `
-    const CACHE = "ritten-v1";
-    const ASSETS = [self.location.href];
-    self.addEventListener("install", e => {
-      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(()=>self.skipWaiting()));
-    });
-    self.addEventListener("activate", e => {
-      e.waitUntil(clients.claim());
-    });
-    self.addEventListener("fetch", e => {
-      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-    });
-  `;
-  const swBlob = new Blob([swCode], { type: "application/javascript" });
-  const swURL  = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL, { scope: "./" }).catch(()=>{});
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-loadData();
-updateStats();
-switchView("dashboard");
+// INIT
+loadData(); updateStats(); switchView("dashboard");
 </script>
 </body>
 </html>
