@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ritten" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Rittenregistratie</title>
+
+  <!-- PWA Manifest inline via blob -->
+  <script>
+    const manifest = {
+      name: "Rittenregistratie",
+      short_name: "Ritten",
+      description: "Registreer zakelijke en privéritten",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#0a0a0f",
+      theme_color: "#0a0a0f",
+      orientation: "portrait",
+      icons: [
+        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>", sizes: "192x192", type: "image/svg+xml" },
+        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>", sizes: "512x512", type: "image/svg+xml" }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+    const manifestURL = URL.createObjectURL(blob);
+    const link = document.createElement("link");
+    link.rel = "manifest"; link.href = manifestURL;
+    document.head.appendChild(link);
+  </script>
+
+  <!-- Apple touch icon inline -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><path d='M50 15C37 15 27 25 27 38c0 18 23 47 23 47s23-29 23-47c0-13-10-23-23-23z' fill='%23f97316'/><circle cx='50' cy='38' r='8' fill='%230a0a0f'/></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      min-height: 100dvh;
+      background: #0a0a0f;
+      color: #e5e7eb;
+      font-family: 'DM Sans', sans-serif;
+      max-width: 430px;
+      margin: 0 auto;
+      overflow-x: hidden;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+
+    @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes slideUp{ from{transform:translateY(28px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes spin   { to{transform:rotate(360deg)} }
+
+    .slide-up { animation: slideUp .38s cubic-bezier(.16,1,.3,1) both; }
+    .fade-in  { animation: fadeIn .25s ease both; }
+    .pulse-anim { animation: pulse 1.5s ease-in-out infinite; }
+
+    /* Layout */
+    #app { display: flex; flex-direction: column; min-height: 100dvh; }
+    header {
+      padding: 18px 22px 0;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(10,10,15,.92); backdrop-filter: blur(12px);
+      padding-top: max(18px, env(safe-area-inset-top));
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .logo { display:flex; align-items:center; gap:8px; }
+    .logo span { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; color:#f97316; letter-spacing:.06em; }
+    .nav-tabs { display:flex; gap:4px; }
+    .nav-tab {
+      padding: 6px 14px; border-radius: 8px; background: transparent;
+      border: none; cursor: pointer; font-size: 13px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; transition: all .2s; position: relative;
+    }
+    .nav-tab.active { background: rgba(249,115,22,.15); color: #f97316; }
+    .nav-tab:not(.active) { color: #6b7280; }
+    .nav-dot { position:absolute; top:4px; right:4px; width:6px; height:6px; border-radius:50%; background:#f97316; }
+
+    /* Views */
+    .view { flex:1; padding:24px 22px 32px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; }
+    #view-active { align-items:center; }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 16px 20px;
+    }
+    .card-orange {
+      background: linear-gradient(135deg, rgba(249,115,22,.12), rgba(249,115,22,.04));
+      border: 1px solid rgba(249,115,22,.25);
+    }
+
+    /* Stats grid */
+    .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stat-label { font-size:11px; color:#6b7280; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+    .stat-val { font-size:26px; font-weight:600; font-family:'DM Mono',monospace; color:#f1f5f9; }
+
+    /* Buttons */
+    .btn-primary {
+      width:100%; padding:18px 0; border-radius:14px; border:none; cursor:pointer;
+      background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
+      font-size:17px; font-weight:600; letter-spacing:.02em; font-family:'DM Sans',sans-serif;
+      box-shadow:0 8px 32px rgba(249,115,22,.45), 0 0 0 1px rgba(249,115,22,.3);
+      transition:transform .15s, box-shadow .15s;
+    }
+    .btn-primary:active { transform:scale(.98); box-shadow:0 4px 16px rgba(249,115,22,.35); }
+    .btn-danger {
+      width:100%; padding:18px 0; border-radius:14px; border:none; cursor:pointer;
+      background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff;
+      font-size:17px; font-weight:600; font-family:'DM Sans',sans-serif;
+      box-shadow:0 8px 32px rgba(220,38,38,.4); transition:transform .15s;
+    }
+    .btn-danger:active { transform:scale(.98); }
+    .btn-ghost {
+      flex:1; padding:14px 0; border-radius:12px;
+      border:1px solid rgba(255,255,255,.1); background:transparent;
+      color:#9ca3af; font-size:15px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    }
+    .btn-confirm {
+      flex:2; padding:14px 0; border-radius:12px; border:none;
+      background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
+      font-size:15px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;
+      box-shadow:0 4px 16px rgba(249,115,22,.4);
+    }
+
+    /* Input */
+    .km-input {
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
+      border-radius:12px; padding:14px 18px; color:#fff; font-size:26px;
+      font-family:'DM Mono',monospace; width:100%; outline:none; transition:border-color .2s;
+    }
+    .km-input:focus { border-color: rgba(249,115,22,.6); }
+
+    /* Live tracking */
+    .live-badge {
+      display:flex; align-items:center; gap:10px;
+      background:rgba(249,115,22,.1); border:1px solid rgba(249,115,22,.3);
+      border-radius:999px; padding:8px 20px; margin-top:8px;
+    }
+    .live-dot {
+      width:10px; height:10px; border-radius:50%; background:#f97316;
+      box-shadow:0 0 0 4px rgba(249,115,22,.25), 0 0 12px #f97316;
+    }
+    .live-label { font-family:'DM Mono',monospace; font-size:13px; color:#f97316; letter-spacing:.1em; }
+    .big-km { font-size:76px; font-weight:700; font-family:'DM Mono',monospace; color:#f1f5f9; line-height:1; letter-spacing:-.02em; }
+    .km-unit { color:#6b7280; font-family:'DM Mono',monospace; font-size:16px; margin-top:4px; }
+    .timer-badge {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+      border-radius:14px; padding:12px 28px;
+      font-family:'DM Mono',monospace; font-size:20px; color:#e5e7eb;
+    }
+
+    /* Row info */
+    .info-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .info-label { font-size:11px; color:#6b7280; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.07em; white-space:nowrap; flex-shrink:0; }
+    .info-val { font-size:13px; color:#e5e7eb; text-align:right; }
+    .divider { height:1px; background:rgba(255,255,255,.07); margin:4px 0; }
+
+    /* History */
+    .rit-card {
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px; overflow:hidden; transition:border-color .2s;
+    }
+    .rit-card.open { border-color:rgba(249,115,22,.3); }
+    .rit-header {
+      width:100%; background:none; border:none; cursor:pointer;
+      padding:16px 18px; display:flex; justify-content:space-between; align-items:center;
+      color:#e5e7eb; text-align:left;
+    }
+    .rit-km { font-family:'DM Mono',monospace; font-size:22px; font-weight:600; color:#f1f5f9; }
+    .rit-date { font-size:12px; color:#6b7280; margin-top:2px; }
+    .rit-meta { display:flex; align-items:center; gap:8px; }
+    .type-badge {
+      padding:4px 12px; border-radius:999px; font-size:11px;
+      font-family:'DM Mono',monospace; font-weight:500; text-transform:uppercase; letter-spacing:.07em;
+    }
+    .type-badge.zakelijk { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
+    .type-badge.prive     { background:rgba(168,85,247,.15); color:#c084fc; border:1px solid rgba(168,85,247,.3); }
+    .chevron { transition:transform .2s; color:#6b7280; }
+    .chevron.open { transform:rotate(180deg); }
+    .rit-details { padding:0 18px 18px; display:flex; flex-direction:column; gap:10px; }
+    .type-toggle { display:flex; gap:6px; }
+    .pill {
+      padding:6px 18px; border-radius:999px; font-size:13px;
+      font-family:'DM Mono',monospace; font-weight:500; border:none; cursor:pointer; transition:all .2s;
+    }
+    .pill.active-z { background:#3b82f6; color:#fff; box-shadow:0 0 12px rgba(59,130,246,.4); }
+    .pill.active-p { background:#a855f7; color:#fff; box-shadow:0 0 12px rgba(168,85,247,.4); }
+    .pill:not(.active-z):not(.active-p) { background:rgba(255,255,255,.07); color:#9ca3af; }
+    .btn-delete {
+      margin-top:4px; padding:8px 0; border-radius:8px;
+      border:1px solid rgba(239,68,68,.25); background:rgba(239,68,68,.06);
+      color:#f87171; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%;
+    }
+
+    /* Floating bar */
+    #float-bar {
+      position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+      width:100%; max-width:430px;
+      padding:12px 20px; background:rgba(10,10,15,.95); backdrop-filter:blur(14px);
+      border-top:1px solid rgba(249,115,22,.3);
+      display:none; justify-content:space-between; align-items:center;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      z-index:30;
+    }
+    #float-bar.visible { display:flex; }
+    .float-btn {
+      padding:6px 14px; background:rgba(249,115,22,.2);
+      border:1px solid rgba(249,115,22,.4); border-radius:8px;
+      color:#f97316; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    }
+
+    /* Error */
+    .error-box {
+      background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3);
+      border-radius:12px; padding:12px 16px; color:#f87171; font-size:13px;
+    }
+
+    /* Empty state */
+    .empty { text-align:center; padding:48px 0; color:#4b5563; }
+    .empty-icon { font-size:44px; margin-bottom:12px; }
+    .empty-title { font-size:16px; color:#6b7280; margin-bottom:6px; }
+    .empty-sub { font-size:13px; }
+
+    /* Install banner */
+    #install-banner {
+      display:none; position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+      width:100%; max-width:430px; padding:14px 20px;
+      background:rgba(15,15,20,.97); border-top:1px solid rgba(249,115,22,.35);
+      backdrop-filter:blur(16px); z-index:40; flex-direction:column; gap:8px;
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+    }
+    #install-banner.show { display:flex; }
+    .install-row { display:flex; justify-content:space-between; align-items:center; }
+    .install-title { font-size:14px; font-weight:600; color:#f1f5f9; }
+    .install-sub { font-size:12px; color:#6b7280; }
+    .install-btns { display:flex; gap:8px; }
+    .btn-install { padding:8px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-dismiss { padding:8px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#9ca3af; font-size:13px; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#f97316"/>
+        <circle cx="12" cy="9" r="2.5" fill="#0a0a0f"/>
+      </svg>
+      <span>RITTEN</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-dash" onclick="switchView('dashboard')">Dashboard</button>
+      <button class="nav-tab" id="tab-hist" onclick="switchView('history')">
+        Historie
+        <span class="nav-dot" id="hist-dot" style="display:none"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <div id="view-dashboard" class="view slide-up">
+    <div class="stats-grid">
+      <div class="card"><div class="stat-label">Totaal ritten</div><div class="stat-val" id="st-total">0</div></div>
+      <div class="card"><div class="stat-label">Zakelijk</div><div class="stat-val" id="st-zakelijk">0</div></div>
+      <div class="card"><div class="stat-label">Totaal km</div><div class="stat-val" id="st-km">0 km</div></div>
+      <div class="card"><div class="stat-label">Privé</div><div class="stat-val" id="st-prive">0</div></div>
+    </div>
+
+    <!-- idle -->
+    <div id="phase-idle">
+      <div class="card card-orange" style="text-align:center;padding:28px 24px;">
+        <div style="color:#9ca3af;font-size:14px;margin-bottom:16px;">Klaar om te rijden?</div>
+        <button class="btn-primary" onclick="beginKmInput()">🚗&nbsp; Start een nieuwe rit</button>
+      </div>
+      <div id="idle-error" class="error-box fade-in" style="display:none;margin-top:12px;"></div>
+    </div>
+
+    <!-- km input -->
+    <div id="phase-km" style="display:none" class="slide-up">
+      <div class="card" style="display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:16px;font-weight:500;">Huidige KM-stand</div>
+        <div style="color:#9ca3af;font-size:13px;">Voer de kilometerstand van je dashboard in.</div>
+        <input id="km-input" class="km-input" type="number" inputmode="decimal" placeholder="bv. 45230"
+          onkeydown="if(event.key==='Enter') startTracking()" />
+        <div id="km-error" class="error-box" style="display:none;"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ghost" onclick="cancelKmInput()">Annuleer</button>
+          <button class="btn-confirm" onclick="startTracking()">Track starten →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE TRACKING -->
+  <div id="view-active" class="view fade-in" style="display:none;">
+    <div class="live-badge pulse-anim" style="margin-top:8px;">
+      <span class="live-dot"></span>
+      <span class="live-label">ACTIEF TRACKEN</span>
+    </div>
+    <div style="text-align:center;margin-top:12px;">
+      <div class="big-km" id="live-km">0.0</div>
+      <div class="km-unit">kilometer</div>
+    </div>
+    <div class="timer-badge" id="live-timer">00m 00s</div>
+    <div class="card" style="width:100%;display:flex;flex-direction:column;gap:10px;">
+      <div class="info-row"><span class="info-label">Start KM</span><span class="info-val" id="a-start-km">—</span></div>
+      <div class="divider"></div>
+      <div class="info-row"><span class="info-label">Starttijd</span><span class="info-val" id="a-start-time">—</span></div>
+      <div class="divider"></div>
+      <div class="info-row"><span class="info-label">Startlocatie</span><span class="info-val" id="a-start-loc">Ophalen…</span></div>
+    </div>
+    <button class="btn-danger" onclick="stopTracking()" style="margin-top:4px;">⏹&nbsp; Beëindig rit</button>
+    <div style="font-size:12px;color:#4b5563;text-align:center;padding-bottom:16px;">Houd het scherm actief voor nauwkeurige tracking</div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="view-history" class="view slide-up" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2 style="font-size:20px;font-weight:600;">Alle ritten</h2>
+      <span id="rit-count" style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7280;"></span>
+    </div>
+    <div id="history-list"></div>
+    <div id="history-empty" class="empty" style="display:none;">
+      <div class="empty-icon">🗺️</div>
+      <div class="empty-title">Nog geen ritten geregistreerd</div>
+      <div class="empty-sub">Start een rit via het dashboard.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Float bar when tracking + not on active view -->
+<div id="float-bar">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="width:10px;height:10px;border-radius:50%;background:#f97316;box-shadow:0 0 0 4px rgba(249,115,22,.25);display:inline-block;" class="pulse-anim"></span>
+    <span style="font-size:13px;color:#f97316;font-family:'DM Mono',monospace;">Rit actief · <span id="float-km">0.0</span> km</span>
+  </div>
+  <button class="float-btn" onclick="switchView('active')">Bekijk</button>
+</div>
+
+<!-- Install banner (Android) -->
+<div id="install-banner">
+  <div class="install-row">
+    <div>
+      <div class="install-title">📍 Voeg toe aan beginscherm</div>
+      <div class="install-sub">Gebruik als app, altijd bij de hand</div>
+    </div>
+  </div>
+  <div class="install-btns">
+    <button class="btn-install" id="btn-install-do">Installeer</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">Later</button>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const LS_KEY = "ritten_v2";
+let ritten = [];
+let phase = "idle";        // idle | kmInput | tracking
+let currentView = "dashboard";
+let watchId = null;
+let timerInterval = null;
+let startTime = null;
+let elapsed = 0;
+let totalKm = 0;
+let prevPos = null;
+let startKmVal = 0;
+let startAddr = "—";
+let expandedId = null;
+let deferredPrompt = null;
+
+// ─── PERSIST ─────────────────────────────────────────────────────────────────
+function loadData() {
+  try { ritten = JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { ritten = []; }
+}
+function saveData() {
+  localStorage.setItem(LS_KEY, JSON.stringify(ritten));
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function haversine(a, b) {
+  const R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLon = (b.lon - a.lon) * Math.PI / 180;
+  const s = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+function fmtKm(km)  { return parseFloat(km).toFixed(1); }
+function fmtDur(s)  { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return `${h?h+"u ":""}${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`; }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString("nl-NL",{day:"2-digit",month:"short",year:"numeric"}); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"}); }
+
+async function getAddr(lat, lon) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    const d = await r.json();
+    const a = d.address;
+    return [a.road, a.house_number].filter(Boolean).join(" ") || a.city || a.town || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+  } catch { return `${lat.toFixed(4)}, ${lon.toFixed(4)}`; }
+}
+
+// ─── VIEWS ───────────────────────────────────────────────────────────────────
+function switchView(v) {
+  currentView = v;
+  ["dashboard","active","history"].forEach(n => {
+    const el = document.getElementById("view-"+n);
+    if (n === v) { el.style.display="flex"; el.classList.add("slide-up"); setTimeout(()=>el.classList.remove("slide-up"),500); }
+    else el.style.display="none";
+  });
+  document.getElementById("tab-dash").className = "nav-tab" + (v==="dashboard"?" active":"");
+  document.getElementById("tab-hist").className = "nav-tab" + (v==="history"?" active":"");
+
+  // float bar: show when tracking and not on active view
+  const fb = document.getElementById("float-bar");
+  fb.className = (phase==="tracking" && v!=="active") ? "visible" : "";
+
+  if (v==="history") renderHistory();
+  if (v==="dashboard") updateStats();
+}
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById("st-total").textContent = ritten.length;
+  document.getElementById("st-zakelijk").textContent = ritten.filter(r=>r.type==="zakelijk").length;
+  document.getElementById("st-prive").textContent = ritten.filter(r=>r.type==="privé").length;
+  document.getElementById("st-km").textContent = fmtKm(ritten.reduce((s,r)=>s+r.kmReden,0))+" km";
+  const dot = document.getElementById("hist-dot");
+  dot.style.display = ritten.length > 0 ? "block" : "none";
+}
+
+// ─── PHASES ──────────────────────────────────────────────────────────────────
+function beginKmInput() {
+  phase = "kmInput";
+  document.getElementById("phase-idle").style.display = "none";
+  document.getElementById("phase-km").style.display   = "block";
+  document.getElementById("km-input").value = "";
+  document.getElementById("km-error").style.display = "none";
+  setTimeout(()=>document.getElementById("km-input").focus(), 100);
+}
+function cancelKmInput() {
+  phase = "idle";
+  document.getElementById("phase-km").style.display  = "none";
+  document.getElementById("phase-idle").style.display = "block";
+}
+function showErr(id, msg) { const e=document.getElementById(id); e.textContent=msg; e.style.display="block"; }
+
+function startTracking() {
+  const raw = document.getElementById("km-input").value.replace(",",".");
+  const val = parseFloat(raw);
+  if (isNaN(val)||val<0) { showErr("km-error","Voer een geldige KM-stand in."); return; }
+  if (!navigator.geolocation) { showErr("km-error","Geolocation wordt niet ondersteund."); return; }
+  document.getElementById("km-error").style.display = "none";
+  startKmVal = val;
+  totalKm = 0; prevPos = null; elapsed = 0;
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const sp = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    prevPos = sp; startTime = Date.now();
+    startAddr = "Ophalen…";
+    phase = "tracking";
+    // update active view
+    document.getElementById("a-start-km").textContent   = val.toLocaleString("nl-NL")+" km";
+    document.getElementById("a-start-time").textContent = fmtTime(startTime);
+    document.getElementById("a-start-loc").textContent  = "Ophalen…";
+    document.getElementById("live-km").textContent      = "0.0";
+    document.getElementById("live-timer").textContent   = "00m 00s";
+    switchView("active");
+    // addr async
+    getAddr(sp.lat, sp.lon).then(a => {
+      startAddr = a;
+      document.getElementById("a-start-loc").textContent = a;
+    });
+    // timer
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      elapsed++;
+      document.getElementById("live-timer").textContent = fmtDur(elapsed);
+    }, 1000);
+    // watch
+    watchId = navigator.geolocation.watchPosition(p => {
+      const cur = { lat: p.coords.latitude, lon: p.coords.longitude };
+      if (prevPos) { totalKm += haversine(prevPos, cur); }
+      prevPos = cur;
+      document.getElementById("live-km").textContent = fmtKm(totalKm);
+      document.getElementById("float-km").textContent = fmtKm(totalKm);
+    }, null, { enableHighAccuracy:true, maximumAge:0 });
+  }, () => showErr("km-error","Kon locatie niet ophalen — geef toestemming."), { enableHighAccuracy:true });
+}
+
+async function stopTracking() {
+  clearInterval(timerInterval);
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  const endKm = startKmVal + totalKm;
+  const endLat = prevPos?.lat, endLon = prevPos?.lon;
+  const endAddr = (endLat) ? await getAddr(endLat, endLon) : "—";
+  const rit = {
+    id: Date.now(), startTime, endTime: Date.now(), duration: elapsed,
+    kmStart: parseFloat(startKmVal.toFixed(2)),
+    kmReden: parseFloat(totalKm.toFixed(2)),
+    kmEind: parseFloat(endKm.toFixed(2)),
+    startAddr, endAddr, type: "zakelijk"
+  };
+  ritten.unshift(rit);
+  saveData();
+  phase = "idle";
+  // reset dashboard phase
+  document.getElementById("phase-km").style.display   = "none";
+  document.getElementById("phase-idle").style.display = "block";
+  document.getElementById("idle-error").style.display = "none";
+  document.getElementById("float-bar").className = "";
+  switchView("history");
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const list = document.getElementById("history-list");
+  const empty = document.getElementById("history-empty");
+  const count = document.getElementById("rit-count");
+  if (ritten.length === 0) { list.innerHTML=""; empty.style.display="block"; count.textContent=""; return; }
+  empty.style.display = "none";
+  count.textContent = ritten.length+" rit"+(ritten.length!==1?"ten":"");
+  list.innerHTML = ritten.map((r,i) => {
+    const open = expandedId === r.id;
+    return `
+    <div class="rit-card${open?" open":""}" id="rc-${r.id}" style="margin-bottom:10px;${i<4?"animation:fadeIn .3s ease "+i*0.06+"s both":""}">
+      <button class="rit-header" onclick="toggleRit(${r.id})">
+        <div>
+          <div class="rit-km">${fmtKm(r.kmReden)} km</div>
+          <div class="rit-date">${fmtDate(r.startTime)} · ${fmtTime(r.startTime)}</div>
+        </div>
+        <div class="rit-meta">
+          <span class="type-badge ${r.type==="zakelijk"?"zakelijk":"prive"}">${r.type==="zakelijk"?"Zakelijk":"Privé"}</span>
+          <svg class="chevron${open?" open":""}" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </button>
+      ${open ? `
+      <div class="rit-details fade-in">
+        <div class="divider"></div>
+        ${[["Start KM",r.kmStart.toLocaleString("nl-NL")+" km"],["Eind KM",r.kmEind.toLocaleString("nl-NL")+" km"],["Gereden",fmtKm(r.kmReden)+" km"],["Duur",fmtDur(r.duration)],["Startlocatie",r.startAddr],["Eindlocatie",r.endAddr]].map(([l,v])=>`
+          <div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>
+        `).join('<div class="divider"></div>')}
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:#6b7280;">Rittype</span>
+          <div class="type-toggle">
+            <button class="pill ${r.type==="zakelijk"?"active-z":""}" onclick="setType(${r.id},'zakelijk')">Zakelijk</button>
+            <button class="pill ${r.type==="privé"?"active-p":""}" onclick="setType(${r.id},'privé')">Privé</button>
+          </div>
+        </div>
+        <button class="btn-delete" onclick="deleteRit(${r.id})">Verwijder rit</button>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function toggleRit(id) {
+  expandedId = expandedId === id ? null : id;
+  renderHistory();
+}
+function setType(id, type) {
+  ritten = ritten.map(r => r.id===id ? {...r, type} : r);
+  saveData(); renderHistory(); updateStats();
+}
+function deleteRit(id) {
+  if (!confirm("Rit verwijderen?")) return;
+  ritten = ritten.filter(r => r.id !== id);
+  if (expandedId === id) expandedId = null;
+  saveData(); renderHistory(); updateStats();
+}
+
+// ─── PWA INSTALL ─────────────────────────────────────────────────────────────
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); deferredPrompt = e;
+  // show banner after 3s if not already installed
+  if (!window.matchMedia("(display-mode: standalone)").matches) {
+    setTimeout(() => document.getElementById("install-banner").classList.add("show"), 3000);
+  }
+});
+document.getElementById("btn-install-do").addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  dismissInstall();
+});
+function dismissInstall() {
+  document.getElementById("install-banner").classList.remove("show");
+}
+
+// ─── SERVICE WORKER (inline blob) ────────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  const swCode = `
+    const CACHE = "ritten-v1";
+    const ASSETS = [self.location.href];
+    self.addEventListener("install", e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(()=>self.skipWaiting()));
+    });
+    self.addEventListener("activate", e => {
+      e.waitUntil(clients.claim());
+    });
+    self.addEventListener("fetch", e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], { type: "application/javascript" });
+  const swURL  = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL, { scope: "./" }).catch(()=>{});
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadData();
+updateStats();
+switchView("dashboard");
+</script>
+</body>
+</html>
