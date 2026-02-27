@@ -72,13 +72,14 @@
     .btn-ghost{flex:1;padding:12px 0;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#9ca3af;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
     .btn-confirm{flex:2;padding:12px 0;border-radius:12px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 
-    .f-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .2s}
+    .f-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;min-width:0;outline:none;transition:border-color .2s}
     .f-input:focus{border-color:rgba(249,115,22,.6)}
     .f-input::placeholder{color:#4b5563}
     .f-label{font-size:10px;color:#6b7280;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
     .f-group{display:flex;flex-direction:column;gap:3px}
-    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .f-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%236b7280' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+    .f-row{display:flex;flex-wrap:wrap;gap:10px}
+    .f-row>.f-group{flex:1 1 120px;min-width:0}
+    .f-select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 13px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;width:100%;min-width:0;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%236b7280' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
     .f-select option{background:#1a1a2e;color:#e5e7eb}
     .km-big{font-size:22px;font-family:'DM Mono',monospace}
 
