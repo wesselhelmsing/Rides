@@ -115,6 +115,7 @@
     .pill.active-p{background:#a855f7;color:#fff;box-shadow:0 0 10px rgba(168,85,247,.4)}
     .pill:not(.active-z):not(.active-p){background:rgba(255,255,255,.07);color:#9ca3af}
     .btn-delete{padding:8px 0;border-radius:8px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:#f87171;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%}
+    .btn-edit{padding:8px 14px;border-radius:8px;border:1px solid rgba(249,115,22,.25);background:rgba(249,115,22,.08);color:#f97316;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
 
     .export-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
     .section-title{font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;font-family:'DM Mono',monospace}
@@ -299,7 +300,7 @@
 <div id="modal-manual" class="modal-overlay hidden" onclick="handleOverlayClick(event,'modal-manual')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">✏️ Rit handmatig toevoegen</div>
+    <div class="modal-title" id="manual-modal-title">✏️ Rit handmatig toevoegen</div>
 
     <div class="f-row">
       <div class="f-group"><div class="f-label">Datum</div><input id="m-datum" class="f-input" type="date" /></div>
@@ -405,6 +406,7 @@ let startTime=null, elapsed=0, totalKm=0;
 let prevPos=null, startKmVal=0, startAddr="—";
 let expandedId=null, deferredPrompt=null;
 let editingAddrId=null, addrLat=null, addrLon=null;
+let editingRitId=null;
 
 // ═══════════════════════════════════════════════════
 // HELPERS
@@ -545,17 +547,42 @@ async function stopTracking(){
 // MANUAL RIT
 // ═══════════════════════════════════════════════════
 function openManualModal(){
+  editingRitId=null;
+  el("manual-modal-title").textContent="✏️ Rit handmatig toevoegen";
   const now=new Date();
   el("m-datum").value=fmtISO(now);
   el("m-start-tijd").value=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
   el("m-end-tijd").value=""; el("m-start-addr").value=""; el("m-end-addr").value="";
   el("m-km-start").value=""; el("m-km-reden").value=""; el("m-type").value="zakelijk";
   hide("m-error"); hide("m-eind-preview");
-  // Render saved address tags
+  renderAddrTags();
+  el("modal-manual").classList.remove("hidden");
+}
+
+function openEditRitModal(id){
+  const r=ritten.find(x=>x.id===id);
+  if(!r) return;
+  editingRitId=id;
+  el("manual-modal-title").textContent="✏️ Rit bewerken";
+  // Fill date/time from startTime
+  const st=new Date(r.startTime), et=new Date(r.endTime||r.startTime);
+  el("m-datum").value=fmtISO(st);
+  el("m-start-tijd").value=`${String(st.getHours()).padStart(2,"0")}:${String(st.getMinutes()).padStart(2,"0")}`;
+  el("m-end-tijd").value=r.endTime?`${String(et.getHours()).padStart(2,"0")}:${String(et.getMinutes()).padStart(2,"0")}`:"";
+  el("m-start-addr").value=r.startAddr||"";
+  el("m-end-addr").value=r.endAddr||"";
+  el("m-km-start").value=r.kmStart>0?r.kmStart:"";
+  el("m-km-reden").value=r.kmReden||"";
+  el("m-type").value=r.type||"zakelijk";
+  hide("m-error"); calcManualEind();
+  renderAddrTags();
+  el("modal-manual").classList.remove("hidden");
+}
+
+function renderAddrTags(){
   const tags=adressen.map(a=>`<span class="addr-tag" onclick="fillAddr('start','${escQ(a.naam)} (${escQ(a.adres)})')">📍 ${a.naam}</span>`).join("");
   el("tags-start").innerHTML=tags;
   el("tags-end").innerHTML=adressen.map(a=>`<span class="addr-tag" onclick="fillAddr('end','${escQ(a.naam)} (${escQ(a.adres)})')">📍 ${a.naam}</span>`).join("");
-  el("modal-manual").classList.remove("hidden");
 }
 function escQ(s){return s.replace(/'/g,"\\'");}
 function fillAddr(side,val){el("m-"+side+"-addr").value=val;}
@@ -587,18 +614,31 @@ function saveManualRit(){
   const dur=Math.floor((etMs-stMs)/1000);
   const kmE=isNaN(kmStart)?kmReden:(kmStart+kmReden);
 
-  const rit={
-    id:Date.now(),startTime:stMs,endTime:etMs,duration:dur,
-    kmStart:isNaN(kmStart)?0:parseFloat(kmStart.toFixed(2)),
-    kmReden:parseFloat(kmReden.toFixed(2)),
-    kmEind:parseFloat(kmE.toFixed(2)),
-    startAddr:startA,endAddr:endA,type,handmatig:true
-  };
-  ritten.unshift(rit);
+  if(editingRitId){
+    // Update existing rit, keep original id
+    ritten=ritten.map(r=>r.id===editingRitId?{
+      ...r,
+      startTime:stMs,endTime:etMs,duration:dur,
+      kmStart:isNaN(kmStart)?0:parseFloat(kmStart.toFixed(2)),
+      kmReden:parseFloat(kmReden.toFixed(2)),
+      kmEind:parseFloat(kmE.toFixed(2)),
+      startAddr:startA,endAddr:endA,type
+    }:r);
+    editingRitId=null;
+  } else {
+    const rit={
+      id:Date.now(),startTime:stMs,endTime:etMs,duration:dur,
+      kmStart:isNaN(kmStart)?0:parseFloat(kmStart.toFixed(2)),
+      kmReden:parseFloat(kmReden.toFixed(2)),
+      kmEind:parseFloat(kmE.toFixed(2)),
+      startAddr:startA,endAddr:endA,type,handmatig:true
+    };
+    ritten.unshift(rit);
+  }
   ritten.sort((a,b)=>b.startTime-a.startTime);
   saveRitten();
   closeModal("modal-manual");
-  switchView("history"); updateStats();
+  renderHistory(); updateStats();
 }
 
 // ═══════════════════════════════════════════════════
@@ -647,7 +687,10 @@ function renderHistory(){
             <button class="pill ${r.type==="privé"?"active-p":""}"   onclick="setType(${r.id},'privé')">Privé</button>
           </div>
         </div>
-        <button class="btn-delete" onclick="deleteRit(${r.id})">Verwijder rit</button>
+        <div style="display:flex;gap:8px;margin-top:2px">
+          <button class="btn-edit" onclick="openEditRitModal(${r.id})">✏️ Bewerk</button>
+          <button class="btn-delete" style="flex:1" onclick="deleteRit(${r.id})">🗑️ Verwijder</button>
+        </div>
       </div>`:""}
     </div>`;
   }).join("");
