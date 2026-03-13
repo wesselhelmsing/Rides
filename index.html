@@ -514,11 +514,25 @@ function startTracking(){
 
     watchId=navigator.geolocation.watchPosition(p=>{
       const cur={lat:p.coords.latitude,lon:p.coords.longitude};
-      if(prevPos) totalKm+=haversine(prevPos,cur);
-      prevPos=cur;
+      const now=p.timestamp||Date.now();
+
+      // Alleen compleet onbetrouwbare fixes negeren (>80m onnauwkeurig)
+      if(p.coords.accuracy > 80) return;
+
+      if(prevPos){
+        const distM=haversine(prevPos,cur)*1000;
+        // Alleen echte GPS-teleports negeren (>300 km/u = fout punt)
+        const dt=(now-(prevPos.ts||now))/3600000||0.001;
+        if((distM/1000)/dt > 300) return;
+        // Alleen pure ruis negeren (< 3 meter — stilstaand)
+        if(distM < 3) return;
+        totalKm+=distM/1000;
+      }
+      prevPos={lat:cur.lat,lon:cur.lon,ts:now};
       el("live-km").textContent=fmtKm(totalKm);
       el("float-km").textContent=fmtKm(totalKm);
-    },null,{enableHighAccuracy:true,maximumAge:0});
+    // maximumAge:0 = altijd de meest verse GPS-positie, zo veel mogelijk punten
+    },null,{enableHighAccuracy:true,maximumAge:0,timeout:15000});
 
   },()=>showErr("km-error","Locatie niet beschikbaar — geef toestemming."),{enableHighAccuracy:true});
 }
